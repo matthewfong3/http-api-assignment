@@ -2,11 +2,63 @@
 <html lang="en">
 <head>
   <title>Our simple HTTP server</title>
-  <link rel="stylesheet" type="text/css" href="/style.css">
-  
+  <link rel="stylesheet" type="text/css" href="style.css">
+    
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
   <script type="text/babel">
+        "use strict";
+        
+        const handleResponse = (xhr) => {
+          const content = document.querySelector('#content');
+          
+          const type = xhr.getResponseHeader('content-type');
+          
+          const h1 = document.createElement('h1');
+          const p = document.createElement('p');
+          
+          if(type === 'application/json'){
+            const obj = JSON.parse(xhr.response);
+            h1.innerHTML = obj.id;
+            p.innerHTML = "JSON: " + obj.message;
+            
+            console.log(obj);
+          }
+          else if(type === 'text/xml'){
+            const id = xhr.responseXML.querySelector('id').textContent;
+            const message = xhr.responseXML.querySelector('message').textContent;
+            h1.textContent = id;
+            p.textContent = "XML: " + message;
+            
+            console.log(xhr.response);
+          }
+          
+          content.innerHTML = '';
+          content.appendChild(h1);
+          content.appendChild(p);
+        };
 
+        const sendRequest = () => {
+          const url = document.querySelector('#page').value;
+          const contentType = document.querySelector('#type').value;
+          
+          const xhr = new XMLHttpRequest();
+          
+          xhr.open('GET', url);
+          
+          xhr.setRequestHeader('Accept', contentType);
+          
+          xhr.onload = () => handleResponse(xhr);
+          
+          xhr.send();
+        };
+        
+        const init = () => {
+          const sendButton = document.querySelector('#send');
+        
+          sendButton.addEventListener('click', sendRequest);
+        };
+      
+        window.onload = init;
   </script>
 </head>
 <body>
